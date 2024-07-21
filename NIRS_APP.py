@@ -74,18 +74,20 @@ if uploaded_file is not None:
     
     
     #Process the data removed the events
-    data_removed_event = [i[:9] for i in data]
+    data_removed_event = [i[:len(rows)-1] for i in data]
     new_data = np.concatenate(data_removed_event)
     #Reshape in the correct columns
     new_data = new_data.reshape(int(len(new_data)/(len(rows)-1)),len(rows)-1)
     
     #Change the headers
     df = pd.DataFrame(new_data)
-    df.columns = [i[1] for i in rows][:9]
+    df.columns = [i[1] for i in rows][:-1]
     df = df.set_index(rows[0][1])
     
+    length_raw_data = len([i[1] for i in rows])
+    
     #Add the events back in
-    data_event = [True if len(i) == 10 else False for i in data]
+    data_event = [True if len(i) > length_raw_data-1 else False for i in data]
     df['event'] = data_event
     
     #Give an option on which data field you want to show
@@ -97,7 +99,6 @@ if uploaded_file is not None:
     x = np.arange(len(df)-2)
     y = df[option].to_numpy().astype(float)[2:]
     y = gaussian_filter1d(y, 5)
-    
     
     #Extract events
     events = df[df['event']].index.values.tolist()
